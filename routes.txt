@@ -1,0 +1,6 @@
+pages/home.html
+home
+pages/test.html
+test
+scripts/ascript.js
+ascript
