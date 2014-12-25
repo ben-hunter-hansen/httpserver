@@ -12,7 +12,8 @@ typedef enum {
 	POST,
 	PUT,
 	DELETE,
-	OPTION
+	OPTION,
+	NOT_VALID
 } r_method;
 
 typedef struct REQUEST_HEADERS {
@@ -21,8 +22,3 @@ typedef struct REQUEST_HEADERS {
 } request_headers;
 
 request_headers get_header_data(char *header_str);
-
-void get_request_method(char *fullstr, int idx, char *buf);
-
-/* Retrurns requested resource uri from request header */
-void get_resource_uri(char *fullstr, int idx, char *buf);

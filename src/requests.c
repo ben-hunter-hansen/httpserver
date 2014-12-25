@@ -4,6 +4,12 @@
 
 #include "requests.h"
 
+void get_request_method(char *fullstr, int idx, char *buf);
+void get_resource_uri(char *fullstr, int idx, char *buf);
+r_method determine_method(char *method_str);
+
+
+
 /*
 **	Translates request header string into a structure containing
 **	all the header data.
@@ -13,30 +19,26 @@
 */
 request_headers get_header_data(char *header_str) {
 	request_headers req_h;
-	char *method, *uri;
 
 	//Begin header string iteration
 	int strpos = 0;
-	method = malloc(MAX_RMETHOD_LEN);
-	uri = malloc(MAX_RURI_LEN);
 
+	char method[MAX_RMETHOD_LEN];
 	get_request_method(header_str, strpos, method);
 	strpos += strlen(method) + 1; //Skip over the space: 'GET '.<--strpos
 
+	char uri[MAX_RURI_LEN];
 	get_resource_uri(header_str, strpos, uri);
 	strpos += strlen(uri) + 1; 
 
-	if(strcmp(method, HTTP_GET) == 0) {
-		r_method this_req = GET;
-		req_h.method = this_req;
-	}
+	//Figure out which request method was sent
+	req_h.method = determine_method(method);
 
+	//Copy the resource uri into the header struct
 	strcpy(req_h.uri, uri);
 
-	free(method);
-	free(uri);
-
 	//do some more parsing..
+
 	return req_h;
 }
 
@@ -51,7 +53,11 @@ void get_request_method(char *fullstr, int idx, char *buf) {
 	char *iterator = fullstr;
 	int i;
 	for(i = 0; *iterator != ' '; i++, iterator++) {
-		*(buf + i) = *iterator;
+		if(i == MAX_RMETHOD_LEN - 1) {
+			break; //bail out
+		} else {
+			*(buf + i) = *iterator;
+		}
 	}
 	*(buf + i) = '\0';
 }
@@ -68,7 +74,39 @@ void get_resource_uri(char *fullstr, int idx, char *buf) {
 	iterator += idx;
 	int i;
 	for(i = 0; *iterator != ' '; i++, iterator++) {
-		*(buf + i) = *iterator;
+		if(i == MAX_RURI_LEN - 1) {
+			break; //bail out
+		} else {
+			*(buf + i) = *iterator;
+		}
 	}
 	*(buf + i) = '\0';
+}
+
+/*
+**	Determines the request method via string comparison
+**	
+**	@param *method_str	the request method string
+**	@return				request method enumerator
+**	@else return		invalid request method type
+*/
+r_method determine_method(char *method_str) {
+	r_method method_actual;
+
+	if(strcmp(method_str, HTTP_GET) == 0) {
+		method_actual = GET;
+	} else if(strcmp(method_str, HTTP_POST) == 0) {
+		method_actual = POST;
+	} else if(strcmp(method_str, HTTP_PUT) == 0) {
+		method_actual = PUT;
+	} else if(strcmp(method_str, HTTP_DELETE) == 0) {
+		method_actual = DELETE;
+	} else if(strcmp(method_str, HTTP_OPTION) == 0) {
+		method_actual = OPTION;
+	} else {
+		printf("Unable to determine request method: %s is invalid.\n", method_str);
+		method_actual = NOT_VALID;
+	}
+
+	return method_actual;
 }

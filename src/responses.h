@@ -5,5 +5,4 @@ static char* OK_RESP =
   "\n";
 
 
-/* Returns the file contents of requested resource */
 char *get_resource_contents(request_headers headers, route routes[MAX_ROUTES], int n);
